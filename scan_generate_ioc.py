@@ -31,6 +31,8 @@ class EcmcIocGenerator(object):
             'AX5103': 'Digital Servo Drive',
             'AX5203': 'Digital Servo Drive',
         }
+        # Standard prefix for ecmccfg commands
+        self.prefix = 'iocshLoad "${ecmccfg_DIR}/'
         self.axis_count = 0
         self.slave_index = -1  # Tracks the EtherCAT slave index
 
@@ -62,7 +64,7 @@ class EcmcIocGenerator(object):
         if self.facility == 'ESS':
             print("require essioc", file=stream)
             print("require ecmccfg\n", file=stream)
-            print('iocshLoad "${ecmccfg_DIR}/startup.cmd" "ECMC_VER=8.0.1, NAMING=ESSnaming"\n', file=stream)
+            print(self.prefix + 'startup.cmd" "ECMC_VER=8.0.1, NAMING=ESSnaming"\n', file=stream)
         elif self.facility == 'PSI':
             print("require ecmccfg\n", file=stream)
 
@@ -82,7 +84,7 @@ class EcmcIocGenerator(object):
                     description = parts[1].strip() if len(parts) > 1 else ""
                     print("# Configure " + hw_desc + " " + description, file=stream)
 
-                print('iocshLoad "${ecmccfg_DIR}addSlave.cmd" HW_DESC=' + hw_desc, file=stream)
+                print(self.prefix + 'addSlave.cmd" HW_DESC=' + hw_desc, file=stream)
 
                 # Check if this hardware is a known motion terminal
                 base_hw = hw_desc.split('-')[0]
@@ -93,16 +95,16 @@ class EcmcIocGenerator(object):
                         print("# Axis " + str(self.axis_count) + ": " + self.motion_hw[base_hw], file=stream)
                     
                     if self.facility == 'ESS':
-                        print('# iocshLoad "${ecmccfg_DIR}configureAxis.cmd" "AXIS_NO=' + str(self.axis_count) + ', CONFIG=./cfg/axis_' + str(self.axis_count) + '.ax"', file=stream)
+                        print('# ' + self.prefix + 'configureAxis.cmd" "AXIS_NO=' + str(self.axis_count) + ', CONFIG=./cfg/axis_' + str(self.axis_count) + '.ax"', file=stream)
                     elif self.facility == 'PSI':
-                        print('# iocshLoad "${ecmccfg_DIR}applyComponent.cmd" "COMP=Motor-Generic-2Phase-Stepper, CH_ID=1, MACROS=\'I_MAX_MA=1000\'"', file=stream)
-                        print('# iocshLoad "${ecmccfg_DIR}loadYamlAxis.cmd" "FILE=cfg/axis_' + str(self.axis_count) + '.yaml, DEV=${DEV}, DRV_SLAVE=' + str(self.slave_index) + ', ENC_SLAVE=' + str(self.slave_index) + ', ENC_CHANNEL=01"', file=stream)
+                        print('# ' + self.prefix + 'applyComponent.cmd" "COMP=Motor-Generic-2Phase-Stepper, CH_ID=1, MACROS=\'I_MAX_MA=1000\'"', file=stream)
+                        print('# ' + self.prefix + 'loadYamlAxis.cmd" "FILE=cfg/axis_' + str(self.axis_count) + '.yaml, DEV=${DEV}, DRV_SLAVE=' + str(self.slave_index) + ', ENC_SLAVE=' + str(self.slave_index) + ', ENC_CHANNEL=01"', file=stream)
 
     def print_footer(self, stream):
         """Prints the facility-specific footer."""
         if self.facility == 'ESS':
-            print('\niocshLoad "${ecmccfg_DIR}/applyConfig.cmd"', file=stream)
-            print('iocshLoad "${ecmccfg_DIR}/setAppMode.cmd"\n', file=stream)
+            print('\n' + self.prefix + 'applyConfig.cmd"', file=stream)
+            print(self.prefix + 'setAppMode.cmd"\n', file=stream)
             print('iocInit\n', file=stream)
         elif self.facility == 'PSI':
             # PSI often handles initialization differently or within finalize.cmd

@@ -17,6 +17,8 @@ class EcmcIocGenerator(object):
         self.lines = []
         # Regex to match Beckhoff prefixes (EK, EL, EP, EJ, CU, AX)
         self.hw_regex = re.compile(r'\b((E[KLPJ]|CU|AX)\d{4}(?:-\d{4})?)\b')
+        # Regex to match the absolute slave index at the start of the line
+        self.index_regex = re.compile(r'^(\d+)')
         
         # Mapping of hardware descriptions to potential axis configuration requirements
         self.motion_hw = {
@@ -71,13 +73,18 @@ class EcmcIocGenerator(object):
     def process_slaves(self, stream):
         """Matches hardware and prints addSlave commands."""
         for line in self.lines:
-            if not line.strip():
+            line = line.strip()
+            if not line:
                 continue
+
+            # Update the absolute slave index from the start of the line
+            index_match = self.index_regex.search(line)
+            if index_match:
+                self.slave_index = int(index_match.group(1))
 
             match = self.hw_regex.search(line)
             if match:
                 hw_desc = match.group(1)
-                self.slave_index += 1
 
                 # Add a blank line before bus couplers (EK) to group segments,
                 # except for the very first slave.

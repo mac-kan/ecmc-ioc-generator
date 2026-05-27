@@ -79,6 +79,11 @@ class EcmcIocGenerator(object):
                 hw_desc = match.group(1)
                 self.slave_index += 1
 
+                # Add a blank line before bus couplers (EK) to group segments,
+                # except for the very first slave.
+                if hw_desc.startswith('EK') and self.slave_index > 0:
+                    print("", file=stream)
+
                 if self.verbose:
                     parts = line.split(hw_desc, 1)
                     description = parts[1].strip() if len(parts) > 1 else ""

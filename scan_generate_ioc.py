@@ -17,6 +17,22 @@ class EcmcIocGenerator(object):
         self.lines = []
         # Regex to match Beckhoff prefixes (EK, EL, EP, EJ, CU, AX)
         self.hw_regex = re.compile(r'\b((E[KLPJ]|CU|AX)\d{4}(?:-\d{4})?)\b')
+        
+        # Mapping of hardware descriptions to potential axis configuration requirements
+        self.motion_hw = {
+            'EL7031': 'Stepper motor terminal',
+            'EL7037': 'Stepper motor terminal',
+            'EL7041': 'Stepper motor terminal',
+            'EL7047': 'Stepper motor terminal',
+            'EL7201': 'Servomotor terminal',
+            'EL7211': 'Servomotor terminal',
+            'EL7221': 'Servomotor terminal',
+            'AX5101': 'Digital Servo Drive',
+            'AX5103': 'Digital Servo Drive',
+            'AX5203': 'Digital Servo Drive',
+        }
+        self.axis_count = 0
+        self.slave_index = -1  # Tracks the EtherCAT slave index
 
     @contextlib.contextmanager
     def _get_output_stream(self):
@@ -59,6 +75,7 @@ class EcmcIocGenerator(object):
             match = self.hw_regex.search(line)
             if match:
                 hw_desc = match.group(1)
+                self.slave_index += 1
 
                 if self.verbose:
                     parts = line.split(hw_desc, 1)
@@ -66,6 +83,20 @@ class EcmcIocGenerator(object):
                     print("# Configure " + hw_desc + " " + description, file=stream)
 
                 print('iocshLoad "${ecmccfg_DIR}addSlave.cmd" HW_DESC=' + hw_desc, file=stream)
+
+                # Check if this hardware is a known motion terminal
+                base_hw = hw_desc.split('-')[0]
+                if base_hw in self.motion_hw:
+                    self.axis_count += 1
+                    
+                    if self.verbose:
+                        print("# Axis " + str(self.axis_count) + ": " + self.motion_hw[base_hw], file=stream)
+                    
+                    if self.facility == 'ESS':
+                        print('# iocshLoad "${ecmccfg_DIR}configureAxis.cmd" "AXIS_NO=' + str(self.axis_count) + ', CONFIG=./cfg/axis_' + str(self.axis_count) + '.ax"', file=stream)
+                    elif self.facility == 'PSI':
+                        print('# iocshLoad "${ecmccfg_DIR}applyComponent.cmd" "COMP=Motor-Generic-2Phase-Stepper, CH_ID=1, MACROS=\'I_MAX_MA=1000\'"', file=stream)
+                        print('# iocshLoad "${ecmccfg_DIR}loadYamlAxis.cmd" "FILE=cfg/axis_' + str(self.axis_count) + '.yaml, DEV=${DEV}, DRV_SLAVE=' + str(self.slave_index) + ', ENC_SLAVE=' + str(self.slave_index) + ', ENC_CHANNEL=01"', file=stream)
 
     def print_footer(self, stream):
         """Prints the facility-specific footer."""

@@ -88,7 +88,7 @@ class EcmcIocGenerator(object):
 
 def main():
     parser = argparse.ArgumentParser(description='Generate ecmc IOC from EtherCAT bus scan.')
-    parser.add_argument('--facility', choices=['ESS', 'PSI'], default='ESS',
+    parser.add_argument('--facility', type=str.upper, choices=['ESS', 'PSI'], default='ESS',
                         help='Target facility (default: ESS)')
     parser.add_argument('--verbose', '-v', action='store_true',
                         help='Include descriptive comments in the output')

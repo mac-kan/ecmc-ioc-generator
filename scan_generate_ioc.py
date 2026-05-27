@@ -9,8 +9,9 @@ class EcmcIocGenerator(object):
     """
     Scans the EtherCAT bus and generates an ecmc-compatible IOC startup script.
     """
-    def __init__(self, facility='ESS'):
+    def __init__(self, facility='ESS', verbose=False):
         self.facility = facility
+        self.verbose = verbose
         self.lines = []
         # Regex to match Beckhoff prefixes (EK, EL, EP, EJ, CU, AX)
         self.hw_regex = re.compile(r'\b((E[KLPJ]|CU|AX)\d{4}(?:-\d{4})?)\b')
@@ -44,10 +45,12 @@ class EcmcIocGenerator(object):
             match = self.hw_regex.search(line)
             if match:
                 hw_desc = match.group(1)
-                parts = line.split(hw_desc, 1)
-                description = parts[1].strip() if len(parts) > 1 else ""
+                
+                if self.verbose:
+                    parts = line.split(hw_desc, 1)
+                    description = parts[1].strip() if len(parts) > 1 else ""
+                    print("# Configure " + hw_desc + " " + description)
 
-                print("# Configure " + hw_desc + " " + description)
                 print('iocshLoad "${ecmccfg_DIR}addSlave.cmd" HW_DESC=' + hw_desc)
 
     def generate(self):
@@ -60,9 +63,11 @@ def main():
     parser = argparse.ArgumentParser(description='Generate ecmc IOC from EtherCAT bus scan.')
     parser.add_argument('--facility', choices=['ESS', 'PSI'], default='ESS',
                         help='Target facility (default: ESS)')
+    parser.add_argument('--verbose', '-v', action='store_true',
+                        help='Include descriptive comments in the output')
     args = parser.parse_args()
 
-    generator = EcmcIocGenerator(facility=args.facility)
+    generator = EcmcIocGenerator(facility=args.facility, verbose=args.verbose)
     generator.generate()
 
 if __name__ == "__main__":

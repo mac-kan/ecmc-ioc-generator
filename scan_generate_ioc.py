@@ -2,6 +2,7 @@
 import sys
 import re
 import subprocess
+import argparse
 
 def main():
     """
@@ -15,7 +16,14 @@ def main():
     It identifies Beckhoff hardware modules (e.g., EK, EL, EP series) using 
     regular expressions and generates the corresponding 'addSlave.cmd' calls 
     required for an ecmc IOC.
+
+    Supports different output formats for ESS and PSI via the --facility flag.
     """
+    parser = argparse.ArgumentParser(description='Generate ecmc IOC from EtherCAT bus scan.')
+    parser.add_argument('--facility', choices=['ESS', 'PSI'], default='ESS',
+                        help='Target facility (default: ESS)')
+    args = parser.parse_args()
+
     # Try to run `ethercat slaves` directly.
     try:
         # check_output is compatible with Python 2.7+ and 3.x
@@ -28,10 +36,14 @@ def main():
         # Fall back to stdin if the command fails or isn't found
         lines = sys.stdin.read().splitlines()
 
-    # Print the header
-    print("require essioc")
-    print("require ecmccfg\n")
-    print('iocshLoad "${ecmccfg_DIR}/startup.cmd" "ECMC_VER=8.0.1, NAMING=ESSnaming"\n')
+    # Print the header based on facility
+    if args.facility == 'ESS':
+        print("require essioc")
+        print("require ecmccfg\n")
+        print('iocshLoad "${ecmccfg_DIR}/startup.cmd" "ECMC_VER=8.0.1, NAMING=ESSnaming"\n')
+    elif args.facility == 'PSI':
+        print("require ecmccfg\n")
+        print('iocshLoad "${ecmccfg_DIR}/startup.cmd" "ECMC_VER=8.0.1"\n')
 
     # Regex to match Beckhoff prefixes (EK, EL, EP, EJ, CU, AX)
     hw_regex = re.compile(r'\b((E[KLPJ]|CU|AX)\d{4}(?:-\d{4})?)\b')

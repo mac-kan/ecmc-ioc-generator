@@ -49,7 +49,6 @@ class EcmcIocGenerator(object):
             print('iocshLoad "${ecmccfg_DIR}/startup.cmd" "ECMC_VER=8.0.1, NAMING=ESSnaming"\n', file=stream)
         elif self.facility == 'PSI':
             print("require ecmccfg\n", file=stream)
-            print('iocshLoad "${ecmccfg_DIR}/startup.cmd" "ECMC_VER=8.0.1"\n', file=stream)
 
     def process_slaves(self, stream):
         """Matches hardware and prints addSlave commands."""

@@ -60,7 +60,7 @@ class EcmcIocGenerator(object):
             match = self.hw_regex.search(line)
             if match:
                 hw_desc = match.group(1)
-                
+
                 if self.verbose:
                     parts = line.split(hw_desc, 1)
                     description = parts[1].strip() if len(parts) > 1 else ""
@@ -68,12 +68,24 @@ class EcmcIocGenerator(object):
 
                 print('iocshLoad "${ecmccfg_DIR}addSlave.cmd" HW_DESC=' + hw_desc, file=stream)
 
+    def print_footer(self, stream):
+        """Prints the facility-specific footer."""
+        if self.facility == 'ESS':
+            print('\niocshLoad "${ecmccfg_DIR}/applyConfig.cmd"', file=stream)
+            print('iocshLoad "${ecmccfg_DIR}/setAppMode.cmd"\n', file=stream)
+            print('iocInit\n', file=stream)
+        elif self.facility == 'PSI':
+            # PSI often handles initialization differently or within finalize.cmd
+            # Provide a trailing newline for cleanliness
+            print('', file=stream)
+
     def generate(self):
         """Orchestrates the scanning and generation process."""
         self.scan_bus()
         with self._get_output_stream() as stream:
             self.print_header(stream)
             self.process_slaves(stream)
+            self.print_footer(stream)
 
 def main():
     parser = argparse.ArgumentParser(description='Generate ecmc IOC from EtherCAT bus scan.')
@@ -85,8 +97,8 @@ def main():
     args = parser.parse_args()
 
     generator = EcmcIocGenerator(
-        facility=args.facility, 
-        verbose=args.verbose, 
+        facility=args.facility,
+        verbose=args.verbose,
         output_file=args.output
     )
     generator.generate()

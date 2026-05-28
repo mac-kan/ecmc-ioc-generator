@@ -80,7 +80,7 @@ class EcmcIocGenerator(object):
         if self.facility == 'ESS':
             print("require essioc", file=stream)
             print("require ecmccfg\n", file=stream)
-            print(self.prefix + 'startup.cmd" "ECMC_VER=8.0.1, NAMING=ESSnaming"\n', file=stream)
+            print(self.prefix + 'startup.cmd" "ECMC_VER=8.0.2, NAMING=ESSnaming"\n', file=stream)
         elif self.facility == 'PSI':
             print("require ecmccfg\n", file=stream)
 

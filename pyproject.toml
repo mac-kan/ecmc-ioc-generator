@@ -29,9 +29,11 @@ scripts.ecmc-ioc-gen = "ecmc_ioc_gen:main"
 
 [tool.ruff]
 target-version = "py37"
+line-length = 100
 
 lint.select = [ "ALL" ]
 lint.ignore = [
+  "ANN",    # ignore type annotations (not for py27)
   "COM812",
   "D107",   # docstrings for __init__ methods
   "D203",   # incompatibility between ruff lint and ruff format
@@ -44,6 +46,9 @@ lint.ignore = [
   "N803",
   "N806",   # allow uppercase variable
   "N815",   # allow camelCase function name, function argument, class scope
+  "PTH",    # ignore pathlib suggestions (not for py27)
+  "S607",   # ignore partial executable paths
   "T201",   # allow print
   "TD",     # TODOs
+  "UP",     # ignore pyupgrade (protect 2.7 compatibility)
 ]

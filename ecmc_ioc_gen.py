@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+"""EtherCAT bus scanner and ecmc IOC generator."""
 from __future__ import print_function
 import sys
 import re
@@ -11,9 +12,7 @@ __email__ = "markus.kristensson@ess.eu"
 
 
 class EcmcIocGenerator(object):
-    """
-    Scans the EtherCAT bus and generates an ecmc-compatible IOC startup script.
-    """
+    """Scan the EtherCAT bus and generate an ecmc-compatible IOC startup script."""
     def __init__(self, facility='ESS', verbose=False, output_file=None):
         self.facility = facility
         self.verbose = verbose
@@ -44,7 +43,7 @@ class EcmcIocGenerator(object):
 
     @contextlib.contextmanager
     def _get_output_stream(self):
-        """Yields a stream object for writing output (file or stdout)."""
+        """Yield a stream object for writing output (file or stdout)."""
         if self.output_file:
             try:
                 with open(self.output_file, 'w') as f:
@@ -57,8 +56,9 @@ class EcmcIocGenerator(object):
 
     def scan_bus(self):
         """
-        Attempts to scan the bus or falls back to stdin.
-        Ensures the script doesn't hang if no input is provided.
+        Scan the bus or fall back to stdin.
+
+        Ensure the script doesn't hang if no input is provided.
         """
         try:
             output = subprocess.check_output(['ethercat', 'slaves'], stderr=subprocess.STDOUT)
@@ -80,7 +80,7 @@ class EcmcIocGenerator(object):
             sys.exit(1)
 
     def print_header(self, stream):
-        """Prints the facility-specific header."""
+        """Print the facility-specific header."""
         if self.facility == 'ESS':
             print("require essioc", file=stream)
             print("require ecmccfg\n", file=stream)
@@ -89,18 +89,18 @@ class EcmcIocGenerator(object):
             print("require ecmccfg\n", file=stream)
 
     def process_slaves(self, stream):
-        """Matches hardware and prints addSlave commands."""
+        """Match hardware and print addSlave commands."""
         for line in self.lines:
-            line = line.strip()
-            if not line:
+            stripped_line = line.strip()
+            if not stripped_line:
                 continue
 
             # Update the absolute slave index from the start of the line
-            index_match = self.index_regex.search(line)
+            index_match = self.index_regex.search(stripped_line)
             if index_match:
                 self.slave_index = int(index_match.group(1))
 
-            match = self.hw_regex.search(line)
+            match = self.hw_regex.search(stripped_line)
             if match:
                 hw_desc = match.group(1)
 
@@ -110,7 +110,7 @@ class EcmcIocGenerator(object):
                     print("", file=stream)
 
                 if self.verbose:
-                    parts = line.split(hw_desc, 1)
+                    parts = stripped_line.split(hw_desc, 1)
                     description = parts[1].strip() if len(parts) > 1 else ""
                     print("# Configure " + hw_desc + " " + description, file=stream)
 
@@ -131,10 +131,10 @@ class EcmcIocGenerator(object):
                         print('# ' + self.prefix + 'loadYamlAxis.cmd" "FILE=cfg/axis_' + str(self.axis_count) + '.yaml, DEV=${DEV}, DRV_SLAVE=' + str(self.slave_index) + ', ENC_SLAVE=' + str(self.slave_index) + ', ENC_CHANNEL=01"', file=stream)
             elif index_match:
                 # Hardware not recognized, but we must account for it to preserve indexing
-                print("# Skip unknown hardware at index " + str(self.slave_index) + ": " + line, file=stream)
+                print("# Skip unknown hardware at index " + str(self.slave_index) + ": " + stripped_line, file=stream)
                 print(self.prefix + 'addSlave.cmd" HW_DESC=SKIP', file=stream)
     def print_footer(self, stream):
-        """Prints the facility-specific footer."""
+        """Print the facility-specific footer."""
         if self.facility == 'ESS':
             print('\n' + self.prefix + 'applyConfig.cmd"', file=stream)
             print(self.prefix + 'setAppMode.cmd"\n', file=stream)
@@ -145,7 +145,7 @@ class EcmcIocGenerator(object):
             print('', file=stream)
 
     def generate(self):
-        """Orchestrates the scanning and generation process."""
+        """Orchestrate the scanning and generation process."""
         self.scan_bus()
         with self._get_output_stream() as stream:
             self.print_header(stream)
@@ -153,9 +153,7 @@ class EcmcIocGenerator(object):
             self.print_footer(stream)
 
 def main():
-    """
-    Parses command-line arguments and generates an ECMC IOC.
-    """
+    """Parse command-line arguments and generate an ECMC IOC."""
     parser = argparse.ArgumentParser(description='Generate ecmc IOC from EtherCAT bus scan.')
     parser.add_argument('--facility', type=str.upper, choices=['ESS', 'PSI'], default='ESS',
                         help='Target facility (default: ESS)')

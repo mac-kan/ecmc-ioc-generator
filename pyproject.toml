@@ -7,24 +7,28 @@ requires = [
 
 [project]
 name = "ecmc-ioc-generator"
-authors = [
-  { name = "Markus Kristensson", email = "markus.kristensson@ess.eu" }
-]
 description = "EtherCAT bus scanner and ecmc IOC generator."
+authors = [
+  { name = "Markus Kristensson", email = "markus.kristensson@ess.eu" },
+]
 requires-python = ">=2.7"
 
 classifiers = [
   "Programming Language :: Python :: 2",
   "Programming Language :: Python :: 2.7",
-  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
 ]
-dependencies = []
+dependencies = [  ]
 
-[project.scripts]
-ecmc-ioc-gen = "ecmc_ioc_gen:main"
+scripts.ecmc-ioc-gen = "ecmc_ioc_gen:main"
 
 [tool.ruff]
-target-version = "py27"
+target-version = "py37"
 
 lint.select = [ "ALL" ]
 lint.ignore = [

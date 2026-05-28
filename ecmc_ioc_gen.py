@@ -19,7 +19,7 @@ class EcmcIocGenerator(object):
         self.hw_regex = re.compile(r'\b((E[KLPJ]|CU|AX)\d{4}(?:-\d{4})?)\b')
         # Regex to match the absolute slave index at the start of the line
         self.index_regex = re.compile(r'^(\d+)')
-        
+
         # Mapping of hardware descriptions to potential axis configuration requirements
         self.motion_hw = {
             'EL7031': 'Stepper motor terminal',
@@ -102,16 +102,19 @@ class EcmcIocGenerator(object):
                 base_hw = hw_desc.split('-')[0]
                 if base_hw in self.motion_hw:
                     self.axis_count += 1
-                    
+
                     if self.verbose:
                         print("# Axis " + str(self.axis_count) + ": " + self.motion_hw[base_hw], file=stream)
-                    
+
                     if self.facility == 'ESS':
                         print('# ' + self.prefix + 'configureAxis.cmd" "AXIS_NO=' + str(self.axis_count) + ', CONFIG=./cfg/axis_' + str(self.axis_count) + '.ax"', file=stream)
                     elif self.facility == 'PSI':
                         print('# ' + self.prefix + 'applyComponent.cmd" "COMP=Motor-Generic-2Phase-Stepper, CH_ID=1, MACROS=\'I_MAX_MA=1000\'"', file=stream)
                         print('# ' + self.prefix + 'loadYamlAxis.cmd" "FILE=cfg/axis_' + str(self.axis_count) + '.yaml, DEV=${DEV}, DRV_SLAVE=' + str(self.slave_index) + ', ENC_SLAVE=' + str(self.slave_index) + ', ENC_CHANNEL=01"', file=stream)
-
+            elif index_match:
+                # Hardware not recognized, but we must account for it to preserve indexing
+                print("# Skip unknown hardware at index " + str(self.slave_index) + ": " + line, file=stream)
+                print(self.prefix + 'addSlave.cmd" HW_DESC=SKIP', file=stream)
     def print_footer(self, stream):
         """Prints the facility-specific footer."""
         if self.facility == 'ESS':

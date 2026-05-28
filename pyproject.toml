@@ -38,8 +38,10 @@ lint.ignore = [
   "D107",   # docstrings for __init__ methods
   "D203",   # incompatibility between ruff lint and ruff format
   "D211",   # incompatible with D203
-  "D212",   # incompatible with D213
+  "D212",   # incompatibility with D213
+  "FBT002", # ignore boolean trap in constructor
   "FIX",    # FIXMEs
+
   "INP001", # allow namespace package
   "ISC001", # may cause conflicts when used with the formatter
   "N802",

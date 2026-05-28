@@ -52,14 +52,28 @@ class EcmcIocGenerator(object):
             yield sys.stdout
 
     def scan_bus(self):
-        """Attempts to scan the bus or falls back to stdin."""
+        """
+        Attempts to scan the bus or falls back to stdin.
+        Ensures the script doesn't hang if no input is provided.
+        """
         try:
-            output = subprocess.check_output(['ethercat', 'slaves'])
+            output = subprocess.check_output(['ethercat', 'slaves'], stderr=subprocess.STDOUT)
             if type(output) is not str:
                 output = output.decode('utf-8', errors='ignore')
             self.lines = output.splitlines()
-        except Exception:
+            return
+        except (subprocess.CalledProcessError, OSError):
+            # Command failed or was not found
+            pass
+
+        # Fall back to stdin only if data is actually being piped in
+        if not sys.stdin.isatty():
             self.lines = sys.stdin.read().splitlines()
+        else:
+            # No command and no piped input - print error and exit
+            print("Error: 'ethercat' command not found and no input piped via stdin.", file=sys.stderr)
+            print("Usage: ecmc-ioc-gen OR cat slaves.txt | ecmc-ioc-gen", file=sys.stderr)
+            sys.exit(1)
 
     def print_header(self, stream):
         """Prints the facility-specific header."""

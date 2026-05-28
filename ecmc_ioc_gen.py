@@ -135,6 +135,9 @@ class EcmcIocGenerator(object):
             self.print_footer(stream)
 
 def main():
+    """
+    Parses command-line arguments and generates an ECMC IOC.
+    """
     parser = argparse.ArgumentParser(description='Generate ecmc IOC from EtherCAT bus scan.')
     parser.add_argument('--facility', type=str.upper, choices=['ESS', 'PSI'], default='ESS',
                         help='Target facility (default: ESS)')

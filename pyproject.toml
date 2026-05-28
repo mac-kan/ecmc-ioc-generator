@@ -1,0 +1,42 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = [
+  "setuptools>=42",
+  "wheel",
+]
+
+[project]
+name = "ecmc-ioc-generator"
+description = "EtherCAT bus scanner and ecmc IOC generator."
+requires-python = ">=2.7"
+
+classifiers = [
+  "Programming Language :: Python :: 2",
+  "Programming Language :: Python :: 2.7",
+  "Programming Language :: Python :: 3",
+]
+dependencies = []
+
+[project.scripts]
+ecmc-ioc-gen = "ecmc_ioc_gen:main"
+
+[tool.ruff]
+target-version = "py27"
+
+lint.select = [ "ALL" ]
+lint.ignore = [
+  "COM812",
+  "D107",   # docstrings for __init__ methods
+  "D203",   # incompatibility between ruff lint and ruff format
+  "D211",   # incompatible with D203
+  "D212",   # incompatible with D213
+  "FIX",    # FIXMEs
+  "INP001", # allow namespace package
+  "ISC001", # may cause conflicts when used with the formatter
+  "N802",
+  "N803",
+  "N806",   # allow uppercase variable
+  "N815",   # allow camelCase function name, function argument, class scope
+  "T201",   # allow print
+  "TD",     # TODOs
+]

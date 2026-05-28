@@ -4,11 +4,15 @@ A Python tool for scanning the EtherCAT bus and automatically generating an ecmc
 
 ## Features
 
-- **Automated Scanning**: Directly polls the EtherCAT bus using the `ethercat` command.
-- **Facility Support**: Generates site-specific headers and footers for both **ESS** and **PSI**.
-- **Axis Templates**: Automatically detects common Beckhoff motion terminals (EL7xxx, AX5xxx) and generates placeholder axis configurations.
+- **Automated Scanning**: Polls the EtherCAT bus using the `ethercat` command.
+- **Facility Support**: Generates site-specific headers and footers for **ESS** and **PSI**.
+- **Axis Templates**: Detects common Beckhoff motion terminals (EL7xxx, AX5xxx) and generates placeholder axis configurations.
 - **Robust Indexing**: Extracts absolute bus indices to ensure accurate hardware mapping even with unknown devices.
 - **Flexible Output**: Supports printing to terminal (stdout) or writing directly to a file.
+
+## Compatibility
+
+This tool supports both **Python 2.7** and **Python 3.x** to ensure compatibility with legacy IOC machines.
 
 ## Installation
 

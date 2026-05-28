@@ -6,6 +6,10 @@ import subprocess
 import argparse
 import contextlib
 
+__author__ = "Markus Kristensson"
+__email__ = "markus.kristensson@ess.eu"
+
+
 class EcmcIocGenerator(object):
     """
     Scans the EtherCAT bus and generates an ecmc-compatible IOC startup script.

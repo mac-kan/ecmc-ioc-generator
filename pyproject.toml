@@ -7,6 +7,9 @@ requires = [
 
 [project]
 name = "ecmc-ioc-generator"
+authors = [
+  { name = "Markus Kristensson", email = "markus.kristensson@ess.eu" }
+]
 description = "EtherCAT bus scanner and ecmc IOC generator."
 requires-python = ">=2.7"
 

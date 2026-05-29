@@ -1,4 +1,11 @@
 #!/usr/bin/env python
+#
+# Copyright (c) 2026, Markus Kristensson, European Spallation Source ERIC
+# All rights reserved.
+#
+# This software is licensed under the BSD 3-Clause License.
+# See the LICENSE file in the project root for full license text.
+#
 """EtherCAT bus scanner and ecmc IOC generator."""
 
 from __future__ import print_function

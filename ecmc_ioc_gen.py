@@ -93,7 +93,7 @@ class EcmcIocGenerator(object):
         elif self.facility == "PSI":
             print("require ecmccfg\n", file=stream)
 
-    def _print_axis_config(self, stream, description):
+    def _print_axis_config(self, stream):
         """Print axis configuration templates for motion terminals."""
         self.axis_count += 1
 
@@ -179,7 +179,7 @@ class EcmcIocGenerator(object):
 
                 # Check if this hardware is a known motion terminal
                 if self.MOTION_REGEX.search(hw_desc):
-                    self._print_axis_config(stream, description)
+                    self._print_axis_config(stream)
             elif index_match:
                 # Hardware not recognized, but we must account for it to preserve indexing
                 print(
@@ -201,9 +201,9 @@ class EcmcIocGenerator(object):
             # PSI often handles initialization differently or within finalize.cmd
             # Provide a trailing newline for cleanliness
             pass
-        
+
         # Single blank line at EOF
-        print("", file=stream)
+        print(file=stream)
 
     def generate(self):
         """Orchestrate the scanning and generation process."""

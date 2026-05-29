@@ -102,7 +102,6 @@ class EcmcIocGenerator(object):
 
         if self.facility == "ESS":
             # ESS pattern: explicit SDOs via ecmcConfigOrDie
-            print(file=stream)
             print(
                 '# ecmcConfigOrDie "Cfg.EcAddSdo(${ECMC_EC_SLAVE_NUM},0x8010,0x1,<TODO>,2)"',
                 file=stream,
@@ -115,6 +114,7 @@ class EcmcIocGenerator(object):
                 '# ecmcConfigOrDie "Cfg.EcAddSdo(${ECMC_EC_SLAVE_NUM},0x8012,0x3A,<TODO>,1)"',
                 file=stream,
             )
+            print(file=stream)
         elif self.facility == "PSI":
             # Templates for PSI: applyComponent, loadYamlAxis and loadYamlEnc
             print(

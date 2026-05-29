@@ -97,9 +97,6 @@ class EcmcIocGenerator(object):
         """Print axis configuration templates for motion terminals."""
         self.axis_count += 1
 
-        if self.verbose:
-            print("# Axis " + str(self.axis_count) + ": " + description, file=stream)
-
         if self.facility == "ESS":
             # ESS pattern: explicit SDOs via ecmcConfigOrDie
             print(
@@ -198,12 +195,15 @@ class EcmcIocGenerator(object):
         """Print the facility-specific footer."""
         if self.facility == "ESS":
             print("\n" + self.prefix + 'applyConfig.cmd"', file=stream)
-            print(self.prefix + 'setAppMode.cmd"\n', file=stream)
-            print("iocInit\n", file=stream)
+            print(self.prefix + 'setAppMode.cmd"', file=stream)
+            print("iocInit", file=stream)
         elif self.facility == "PSI":
             # PSI often handles initialization differently or within finalize.cmd
             # Provide a trailing newline for cleanliness
-            print(file=stream)
+            pass
+        
+        # Single blank line at EOF
+        print("", file=stream)
 
     def generate(self):
         """Orchestrate the scanning and generation process."""

@@ -13,7 +13,6 @@ authors = [
   { name = "Markus Kristensson", email = "markus.kristensson@ess.eu" },
 ]
 requires-python = ">=2.7"
-
 classifiers = [
   "Programming Language :: Python :: 2",
   "Programming Language :: Python :: 2.7",
@@ -32,14 +31,17 @@ ecmc-ioc-gen = "ecmc_ioc_gen:main"
 [tool.ruff]
 target-version = "py37"
 line-length = 100
+include = ["*.py", "*.pyi", "**/pyproject.toml"]
 
-lint.select = [ "ALL" ]
+lint.select = [
+  "ALL",
+]
 lint.ignore = [
   "ANN",    # ignore type annotations (not for py27)
   "COM812",
   "D107",   # docstrings for __init__ methods
   "D203",   # incompatibility between ruff lint and ruff format
-  "D211",   # incompatible with D203
+  "D211",   # incompatibility with D203
   "D212",   # incompatibility with D213
   "FBT002", # ignore boolean trap in constructor
   "FIX",    # FIXMEs

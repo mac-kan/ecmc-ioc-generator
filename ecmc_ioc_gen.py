@@ -118,7 +118,6 @@ class EcmcIocGenerator(object):
                 '# ecmcConfigOrDie "Cfg.EcAddSdo(${ECMC_EC_SLAVE_NUM},0x8012,0x3A,<TODO>,1)"',
                 file=stream,
             )
-            print(file=stream)
         elif self.facility == "PSI":
             # Templates for PSI: applyComponent, loadYamlAxis and loadYamlEnc
             print(
@@ -149,6 +148,8 @@ class EcmcIocGenerator(object):
                 + 'DEV=${IOC}, DRV_SID=${ECMC_EC_SLAVE_NUM}"',
                 file=stream,
             )
+
+        print(file=stream)
 
     def process_slaves(self, stream):
         """Match hardware and print addSlave commands."""

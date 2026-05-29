@@ -49,6 +49,13 @@ Toggle between ESS and PSI output standards (default is ESS):
 ecmc-ioc-gen --facility PSI
 ```
 
+### ECMC Version Selection (ESS)
+Specify a different ECMC version for ESS output (default is 8.0.2):
+
+```bash
+ecmc-ioc-gen --ecmc-ver 7.0.0
+```
+
 ### Write to File
 Generate a startup script directly to a file:
 

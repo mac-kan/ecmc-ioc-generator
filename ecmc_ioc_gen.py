@@ -24,9 +24,7 @@ class EthercatScanner(object):
         """
         # 1. Try to run the actual 'ethercat' command
         try:
-            output = subprocess.check_output(
-                ["ethercat", "slaves"], stderr=subprocess.STDOUT
-            )
+            output = subprocess.check_output(["ethercat", "slaves"], stderr=subprocess.STDOUT)
             if type(output) is not str:
                 output = output.decode("utf-8", errors="ignore")
             return output.splitlines()
@@ -48,11 +46,12 @@ class EthercatScanner(object):
 class EcmcIocGenerator(object):
     """Scan the EtherCAT bus and generate an ecmc-compatible IOC startup script."""
 
-    def __init__(self, scanner, facility="ESS", verbose=False, output_file=None):
+    def __init__(self, scanner, facility="ESS", verbose=False, output_file=None, ecmc_ver="8.0.2"):
         self.scanner = scanner
         self.facility = facility
         self.verbose = verbose
         self.output_file = output_file
+        self.ecmc_ver = ecmc_ver
         self.lines = []
         # Regex to match Beckhoff prefixes (EK, EL, EP, EJ, CU, AX)
         self.hw_regex = re.compile(r"\b((E[KLPJ]|CU|AX)\d{4}(?:-\d{4})?)\b")
@@ -96,7 +95,10 @@ class EcmcIocGenerator(object):
         if self.facility == "ESS":
             print("require essioc", file=stream)
             print("require ecmccfg\n", file=stream)
-            print(self.prefix + 'startup.cmd" "ECMC_VER=8.0.2, NAMING=ESSnaming"\n', file=stream)
+            print(
+                self.prefix + 'startup.cmd" "ECMC_VER=' + self.ecmc_ver + ', NAMING=ESSnaming"\n',
+                file=stream,
+            )
         elif self.facility == "PSI":
             print("require ecmccfg\n", file=stream)
 
@@ -204,11 +206,16 @@ def main():
         "--verbose", "-v", action="store_true", help="Include descriptive comments in the output"
     )
     parser.add_argument("--output", "-o", help="Output file path (default: stdout)")
+    parser.add_argument("--ecmc-ver", default="8.0.2", help="ECMC version to use (default: 8.0.2)")
     args = parser.parse_args()
 
     scanner = EthercatScanner()
     generator = EcmcIocGenerator(
-        scanner=scanner, facility=args.facility, verbose=args.verbose, output_file=args.output
+        scanner=scanner,
+        facility=args.facility,
+        verbose=args.verbose,
+        output_file=args.output,
+        ecmc_ver=args.ecmc_ver,
     )
     generator.generate()
 

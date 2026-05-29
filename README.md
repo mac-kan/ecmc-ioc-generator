@@ -2,6 +2,8 @@
 
 A Python tool for scanning the EtherCAT bus and automatically generating an ecmc-compatible EPICS IOC startup script.
 
+This tool is designed to work with the [ecmc](https://github.com/paulscherrerinstitute/ecmc) (EtherCAT Motion Control) framework and its configuration tool [ecmccfg](https://github.com/paulscherrerinstitute/ecmccfg).
+
 ## Features
 
 - **Automated Scanning**: Polls the EtherCAT bus using the `ethercat` command.

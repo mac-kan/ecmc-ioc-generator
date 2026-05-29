@@ -193,9 +193,9 @@ def main():
     parser.add_argument("--ecmc-ver", default="8.0.2", help="ECMC version to use (default: 8.0.2)")
     args = parser.parse_args()
 
-    scanner = EthercatScanner()
-    generator = EcmcIocGenerator(
-        scanner=scanner,
+    ethercat_scanner = EthercatScanner()
+    ioc_generator = EcmcIocGenerator(
+        scanner=ethercat_scanner,
         facility=args.facility,
         verbose=args.verbose,
         output_file=args.output,
@@ -203,7 +203,7 @@ def main():
     )
 
     try:
-        generator.generate()
+        ioc_generator.generate()
     except RuntimeError as e:
         print(str(e), file=sys.stderr)
         print("Usage: ecmc-ioc-gen OR cat slaves.txt | ecmc-ioc-gen", file=sys.stderr)

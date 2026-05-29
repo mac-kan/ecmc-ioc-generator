@@ -57,20 +57,9 @@ class EcmcIocGenerator(object):
         self.hw_regex = re.compile(r"\b((E[KLPJ]|CU|AX)\d{4}(?:-\d{4})?)\b")
         # Regex to match the absolute slave index at the start of the line
         self.index_regex = re.compile(r"^(\d+)")
+        # Regex to match motion-capable terminals (EL7xxx, ELM7xxx, AX5xxx)
+        self.motion_regex = re.compile(r"\b(EL7\d{3}|ELM7\d{3}|AX5\d{3})")
 
-        # Mapping of hardware descriptions to potential axis configuration requirements
-        self.motion_hw = {
-            "EL7031": "Stepper motor terminal",
-            "EL7037": "Stepper motor terminal",
-            "EL7041": "Stepper motor terminal",
-            "EL7047": "Stepper motor terminal",
-            "EL7201": "Servomotor terminal",
-            "EL7211": "Servomotor terminal",
-            "EL7221": "Servomotor terminal",
-            "AX5101": "Digital Servo Drive",
-            "AX5103": "Digital Servo Drive",
-            "AX5203": "Digital Servo Drive",
-        }
         # Standard prefix for ecmccfg commands
         self.prefix = 'iocshLoad "${ecmccfg_DIR}/'
         self.axis_count = 0
@@ -102,15 +91,12 @@ class EcmcIocGenerator(object):
         elif self.facility == "PSI":
             print("require ecmccfg\n", file=stream)
 
-    def _print_axis_config(self, stream, base_hw):
+    def _print_axis_config(self, stream, description):
         """Print axis configuration templates for motion terminals."""
         self.axis_count += 1
 
         if self.verbose:
-            print(
-                "# Axis " + str(self.axis_count) + ": " + self.motion_hw[base_hw],
-                file=stream,
-            )
+            print("# Axis " + str(self.axis_count) + ": " + description, file=stream)
 
         if self.facility == "ESS":
             cfg = "./cfg/axis_" + str(self.axis_count) + '.ax"'
@@ -158,9 +144,8 @@ class EcmcIocGenerator(object):
                 print(self.prefix + 'addSlave.cmd" HW_DESC=' + hw_desc, file=stream)
 
                 # Check if this hardware is a known motion terminal
-                base_hw = hw_desc.split("-")[0]
-                if base_hw in self.motion_hw:
-                    self._print_axis_config(stream, base_hw)
+                if self.motion_regex.search(hw_desc):
+                    self._print_axis_config(stream, description)
             elif index_match:
                 # Hardware not recognized, but we must account for it to preserve indexing
                 print(

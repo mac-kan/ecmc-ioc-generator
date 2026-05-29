@@ -46,6 +46,13 @@ class EthercatScanner(object):
 class EcmcIocGenerator(object):
     """Scan the EtherCAT bus and generate an ecmc-compatible IOC startup script."""
 
+    # Regex to match Beckhoff prefixes (EK, EL, EP, EJ, CU, AX)
+    HW_REGEX = re.compile(r"\b((E[KLPJ]|CU|AX)\d{4}(?:-\d{4})?)\b")
+    # Regex to match the absolute slave index at the start of the line
+    INDEX_REGEX = re.compile(r"^(\d+)")
+    # Regex to match motion-capable terminals (EL7xxx, ELM7xxx, AX5xxx)
+    MOTION_REGEX = re.compile(r"\b(EL7\d{3}|ELM7\d{3}|AX5\d{3})")
+
     def __init__(self, scanner, facility="ESS", verbose=False, output_file=None, ecmc_ver="8.0.2"):
         self.scanner = scanner
         self.facility = facility
@@ -53,12 +60,6 @@ class EcmcIocGenerator(object):
         self.output_file = output_file
         self.ecmc_ver = ecmc_ver
         self.lines = []
-        # Regex to match Beckhoff prefixes (EK, EL, EP, EJ, CU, AX)
-        self.hw_regex = re.compile(r"\b((E[KLPJ]|CU|AX)\d{4}(?:-\d{4})?)\b")
-        # Regex to match the absolute slave index at the start of the line
-        self.index_regex = re.compile(r"^(\d+)")
-        # Regex to match motion-capable terminals (EL7xxx, ELM7xxx, AX5xxx)
-        self.motion_regex = re.compile(r"\b(EL7\d{3}|ELM7\d{3}|AX5\d{3})")
 
         # Standard prefix for ecmccfg commands
         self.prefix = 'iocshLoad "${ecmccfg_DIR}/'
@@ -123,11 +124,11 @@ class EcmcIocGenerator(object):
                 continue
 
             # Update the absolute slave index from the start of the line
-            index_match = self.index_regex.search(stripped_line)
+            index_match = self.INDEX_REGEX.search(stripped_line)
             if index_match:
                 self.slave_index = int(index_match.group(1))
 
-            match = self.hw_regex.search(stripped_line)
+            match = self.HW_REGEX.search(stripped_line)
             if match:
                 hw_desc = match.group(1)
 
@@ -144,7 +145,7 @@ class EcmcIocGenerator(object):
                 print(self.prefix + 'addSlave.cmd" HW_DESC=' + hw_desc, file=stream)
 
                 # Check if this hardware is a known motion terminal
-                if self.motion_regex.search(hw_desc):
+                if self.MOTION_REGEX.search(hw_desc):
                     self._print_axis_config(stream, description)
             elif index_match:
                 # Hardware not recognized, but we must account for it to preserve indexing

@@ -8,7 +8,7 @@ This tool is designed to work with the [ecmc](https://github.com/paulscherrerins
 
 - **Automated Scanning**: Polls the EtherCAT bus using the `ethercat` command.
 - **Facility Support**: Generates site-specific headers and footers for **ESS** and **PSI**.
-- **Axis Templates**: Detects common Beckhoff motion terminals (EL7xxx, AX5xxx) and generates placeholder axis configurations.
+- **Axis Templates**: Automatically detects common Beckhoff motion terminals (EL7xxx, ELM7xxx, AX5xxx) and generates placeholder axis configurations.
 - **Robust Indexing**: Extracts absolute bus indices to ensure accurate hardware mapping even with unknown devices.
 - **Flexible Output**: Supports printing to terminal (stdout) or writing directly to a file.
 
@@ -69,10 +69,3 @@ Include hardware descriptions and axis details in the output:
 ```bash
 ecmc-ioc-gen --verbose
 ```
-
-## Configuration
-
-The tool recognizes a variety of Beckhoff modules. Motion terminals currently supported for placeholder generation include:
-- Stepper Terminals: EL7031, EL7037, EL7041, EL7047
-- Servo Terminals: EL7201, EL7211, EL7221
-- Digital Servo Drives: AX5101, AX5103, AX5203

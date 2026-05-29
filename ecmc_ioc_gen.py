@@ -135,9 +135,11 @@ class EcmcIocGenerator(object):
                 if hw_desc.startswith("EK") and self.slave_index > 0:
                     print(file=stream)
 
+                # Grab the rest of the line as the description
+                parts = stripped_line.split(hw_desc, 1)
+                description = parts[1].strip() if len(parts) > 1 else ""
+
                 if self.verbose:
-                    parts = stripped_line.split(hw_desc, 1)
-                    description = parts[1].strip() if len(parts) > 1 else ""
                     print("# Configure " + hw_desc + " " + description, file=stream)
 
                 print(self.prefix + 'addSlave.cmd" HW_DESC=' + hw_desc, file=stream)

@@ -21,14 +21,12 @@ This tool supports both **Python 2.7** and **Python 3.x** to ensure compatibilit
 You can install the tool directly from the repository:
 
 ```bash
-git clone https://github.com/your-repo/ecmc-ioc-generator.git
-cd ecmc-ioc-generator
-pip install .
+pip install git+https://github.com/mac-kan/ecmc-ioc-generator.git
 ```
 
 ## Usage
 
-### Basic Scan (Live Bus)
+### Live Scan
 Run the script on an EtherCAT master machine:
 
 ```bash

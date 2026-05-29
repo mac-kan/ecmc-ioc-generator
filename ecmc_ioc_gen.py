@@ -36,11 +36,9 @@ class EthercatScanner(object):
         if not sys.stdin.isatty():
             return sys.stdin.read().splitlines()
 
-        # No command and no piped input - print error and exit
+        # No command and no piped input - raise error
         msg = "Error: 'ethercat' command not found and no input piped via stdin."
-        print(msg, file=sys.stderr)
-        print("Usage: ecmc-ioc-gen OR cat slaves.txt | ecmc-ioc-gen", file=sys.stderr)
-        sys.exit(1)
+        raise RuntimeError(msg)
 
 
 class EcmcIocGenerator(object):
@@ -203,7 +201,13 @@ def main():
         output_file=args.output,
         ecmc_ver=args.ecmc_ver,
     )
-    generator.generate()
+
+    try:
+        generator.generate()
+    except RuntimeError as e:
+        print(str(e), file=sys.stderr)
+        print("Usage: ecmc-ioc-gen OR cat slaves.txt | ecmc-ioc-gen", file=sys.stderr)
+        sys.exit(1)
 
 
 if __name__ == "__main__":

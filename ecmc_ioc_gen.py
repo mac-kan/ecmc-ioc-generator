@@ -60,7 +60,10 @@ class EcmcIocGenerator(object):
         self.lines = []
 
         # Standard prefix for ecmccfg commands
-        self.prefix = 'iocshLoad "${ecmccfg_DIR}/'
+        if self.facility == "ESS":
+            self.prefix = 'iocshLoad "${ecmccfg_DIR}/'
+        else:
+            self.prefix = "${SCRIPTEXEC} ${ecmccfg_DIR}"
         self.axis_count = 0
         self.slave_index = -1  # Tracks the EtherCAT slave index
 
@@ -90,7 +93,7 @@ class EcmcIocGenerator(object):
         elif self.facility == "PSI":
             print("require ecmccfg\n", file=stream)
 
-    def _print_axis_config(self, stream, description, hw_desc):
+    def _print_axis_config(self, stream, description):
         """Print axis configuration templates for motion terminals."""
         self.axis_count += 1
 
@@ -113,17 +116,35 @@ class EcmcIocGenerator(object):
                 file=stream,
             )
         elif self.facility == "PSI":
-            # Templates for PSI: applyComponent and loadYamlAxis
-            comp_cmd = "# " + self.prefix + 'applyComponent.cmd" '
-            comp_args = '"COMP=<COMPONENT>, CH_ID=<CHANNEL>, '
-            comp_macros = "MACROS='<MACROS>'\""
-            print(comp_cmd + comp_args + comp_macros, file=stream)
-
-            yaml_cmd = "# " + self.prefix + 'loadYamlAxis.cmd" '
-            yaml_args = '"FILE=cfg/axis_' + str(self.axis_count) + ".yaml, "
-            yaml_slaves = "DEV=${DEV}, DRV_SLAVE=${ECMC_EC_SLAVE_NUM}, ENC_SLAVE=${ECMC_EC_SLAVE_NUM}"
-            yaml_enc = ', ENC_CHANNEL=<CHANNEL>"'
-            print(yaml_cmd + yaml_args + yaml_slaves + yaml_enc, file=stream)
+            # Templates for PSI: applyComponent, loadYamlAxis and loadYamlEnc
+            print(
+                "# "
+                + self.prefix
+                + 'applyComponent.cmd "COMP=<TODO_COMPONENT>, '
+                + "MACROS='I_MAX_MA=<TODO>, I_STDBY_MA=<TODO>, "
+                + "U_NOM_MV=<TODO>, R_COIL_MOHM=<TODO>'\"",
+                file=stream,
+            )
+            print(
+                "# "
+                + self.prefix
+                + 'loadYamlAxis.cmd, "FILE=./cfg/axis_'
+                + str(self.axis_count)
+                + ".yaml, DEV=${IOC}, AX_NAME=M"
+                + str(self.axis_count)
+                + ", AXIS_ID="
+                + str(self.axis_count)
+                + ", DRV_SID=${ECMC_EC_SLAVE_NUM}, ENC_SID=<TODO_ENC_SID>, ENC_CH=<TODO>, "
+                + 'BO_SID=<TODO_BO_SID>, BO_CH=<TODO>"',
+                file=stream,
+            )
+            print(
+                "# "
+                + self.prefix
+                + 'loadYamlEnc.cmd, "FILE=./cfg/enc_open_loop.yaml, '
+                + 'DEV=${IOC}, DRV_SID=${ECMC_EC_SLAVE_NUM}"',
+                file=stream,
+            )
 
     def process_slaves(self, stream):
         """Match hardware and print addSlave commands."""
@@ -153,11 +174,15 @@ class EcmcIocGenerator(object):
                 if self.verbose:
                     print("# Configure " + hw_desc + " " + description, file=stream)
 
-                print(self.prefix + 'addSlave.cmd" HW_DESC=' + hw_desc, file=stream)
+                if self.facility == "ESS":
+                    print(self.prefix + 'addSlave.cmd" HW_DESC=' + hw_desc, file=stream)
+                else:
+                    # PSI style: comma and different quoting
+                    print(self.prefix + 'addSlave.cmd, "HW_DESC=' + hw_desc + '"', file=stream)
 
                 # Check if this hardware is a known motion terminal
                 if self.MOTION_REGEX.search(hw_desc):
-                    self._print_axis_config(stream, description, hw_desc)
+                    self._print_axis_config(stream, description)
             elif index_match:
                 # Hardware not recognized, but we must account for it to preserve indexing
                 print(

@@ -90,7 +90,7 @@ class EcmcIocGenerator(object):
         elif self.facility == "PSI":
             print("require ecmccfg\n", file=stream)
 
-    def _print_axis_config(self, stream, description):
+    def _print_axis_config(self, stream, description, hw_desc):
         """Print axis configuration templates for motion terminals."""
         self.axis_count += 1
 
@@ -98,20 +98,31 @@ class EcmcIocGenerator(object):
             print("# Axis " + str(self.axis_count) + ": " + description, file=stream)
 
         if self.facility == "ESS":
-            cfg = "./cfg/axis_" + str(self.axis_count) + '.ax"'
-            cmd = "# " + self.prefix + 'configureAxis.cmd" "AXIS_NO='
-            print(cmd + str(self.axis_count) + ", CONFIG=" + cfg, file=stream)
+            # ESS pattern: explicit SDOs via ecmcConfigOrDie
+            print(file=stream)
+            print(
+                '# ecmcConfigOrDie "Cfg.EcAddSdo(${ECMC_EC_SLAVE_NUM},0x8010,0x1,<TODO>,2)"',
+                file=stream,
+            )
+            print(
+                '# ecmcConfigOrDie "Cfg.EcAddSdo(${ECMC_EC_SLAVE_NUM},0x8010,0x2,<TODO>,2)"',
+                file=stream,
+            )
+            print(
+                '# ecmcConfigOrDie "Cfg.EcAddSdo(${ECMC_EC_SLAVE_NUM},0x8012,0x3A,<TODO>,1)"',
+                file=stream,
+            )
         elif self.facility == "PSI":
             # Templates for PSI: applyComponent and loadYamlAxis
             comp_cmd = "# " + self.prefix + 'applyComponent.cmd" '
-            comp_args = '"COMP=Motor-Generic-2Phase-Stepper, CH_ID=1, '
-            comp_macros = "MACROS='I_MAX_MA=1000'\""
+            comp_args = '"COMP=<COMPONENT>, CH_ID=<CHANNEL>, '
+            comp_macros = "MACROS='<MACROS>'\""
             print(comp_cmd + comp_args + comp_macros, file=stream)
 
             yaml_cmd = "# " + self.prefix + 'loadYamlAxis.cmd" '
             yaml_args = '"FILE=cfg/axis_' + str(self.axis_count) + ".yaml, "
-            yaml_slaves = "DEV=${DEV}, DRV_SLAVE=" + str(self.slave_index)
-            yaml_enc = ", ENC_SLAVE=" + str(self.slave_index) + ', ENC_CHANNEL=01"'
+            yaml_slaves = "DEV=${DEV}, DRV_SLAVE=${ECMC_EC_SLAVE_NUM}, ENC_SLAVE=${ECMC_EC_SLAVE_NUM}"
+            yaml_enc = ', ENC_CHANNEL=<CHANNEL>"'
             print(yaml_cmd + yaml_args + yaml_slaves + yaml_enc, file=stream)
 
     def process_slaves(self, stream):
@@ -146,7 +157,7 @@ class EcmcIocGenerator(object):
 
                 # Check if this hardware is a known motion terminal
                 if self.MOTION_REGEX.search(hw_desc):
-                    self._print_axis_config(stream, description)
+                    self._print_axis_config(stream, description, hw_desc)
             elif index_match:
                 # Hardware not recognized, but we must account for it to preserve indexing
                 print(

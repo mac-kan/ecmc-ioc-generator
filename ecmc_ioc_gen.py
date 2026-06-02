@@ -88,7 +88,15 @@ class EcmcIocGenerator(object):
         else:
             yield sys.stdout
 
-    def print_header(self, stream):
+    def generate(self):
+        """Orchestrate the scanning and generation process."""
+        self.lines = self.scanner.scan()
+        with self._get_output_stream() as stream:
+            self._print_header(stream)
+            self._process_slaves(stream)
+            self._print_footer(stream)
+
+    def _print_header(self, stream):
         """Print the facility-specific header."""
         if self.facility == "ESS":
             print("require essioc", file=stream)
@@ -151,7 +159,7 @@ class EcmcIocGenerator(object):
 
         print(file=stream)
 
-    def process_slaves(self, stream):
+    def _process_slaves(self, stream):
         """Match hardware and print addSlave commands."""
         for line in self.lines:
             stripped_line = line.strip()
@@ -199,7 +207,7 @@ class EcmcIocGenerator(object):
                 )
                 print(self.prefix + 'addSlave.cmd" HW_DESC=SKIP', file=stream)
 
-    def print_footer(self, stream):
+    def _print_footer(self, stream):
         """Print the facility-specific footer."""
         if self.facility == "ESS":
             print("\n" + self.prefix + 'applyConfig.cmd"', file=stream)
@@ -212,14 +220,6 @@ class EcmcIocGenerator(object):
 
         # Single blank line at EOF
         print(file=stream)
-
-    def generate(self):
-        """Orchestrate the scanning and generation process."""
-        self.lines = self.scanner.scan()
-        with self._get_output_stream() as stream:
-            self.print_header(stream)
-            self.process_slaves(stream)
-            self.print_footer(stream)
 
 
 def main():

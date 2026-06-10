@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 
+from .scanners import EthercatScanner
 
 def cli():
     """Parse command-line arguments and generate an ECMC IOC."""
@@ -24,3 +25,8 @@ def cli():
     args = parser.parse_args()
 
     print(f"Generating ECMC IOC for facility: {args.facility}")
+
+    ethercat_scanner = EthercatScanner()
+    l = ethercat_scanner.scan()
+    print(f"Scanned {len(l)} lines from EtherCAT bus or stdin.")
+    print(f"First 3 lines of scan output:\n{l[:3]}")

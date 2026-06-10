@@ -32,13 +32,8 @@ def cli():
 
     print(f"Generating ECMC IOC for facility: {args.facility}")
 
-    ethercat_scanner = EthercatScanner()
-    lines = ethercat_scanner.scan()
-    print(f"Scanned {len(lines)} lines from EtherCAT bus or stdin.")
-    print(f"First 3 lines of scan output:\n{lines[:3]}")
-
     ioc_generator = ESSGenerator(
-        scanner=ethercat_scanner,
+        scanner=EthercatScanner(),
         output_file=args.output,
         ecmc_ver=args.ecmc_ver,
         verbose=args.verbose,

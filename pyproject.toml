@@ -28,7 +28,7 @@ dev = [
 dependencies = []
 
 [project.scripts]
-ecmc-ioc-gen = "ecmc_ioc_gen:main"
+ecmc-ioc-gen = "ecmc_ioc_generator.cli:cli"
 
 [tool.ruff]
 target-version = "py312"
@@ -66,8 +66,11 @@ build-backend = "hatchling.build"
 
 [tool.hatch]
 version.source = "vcs"
-build.hooks.vcs.version-file = "src/ecmc-ioc-generator/_version.py"
+build.hooks.vcs.version-file = "src/ecmc_ioc_generator/_version.py"
 version.fallback-version = "0.0.0"
+
+# [tool.hatch.build.targets.wheel]
+# packages = ["src/ecmc_ioc_generator"]
 
 [tool.hatch.envs.default]
 features = ["dev"]

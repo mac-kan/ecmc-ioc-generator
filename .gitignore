@@ -9,3 +9,4 @@ build/
 
 # Tools
 .ruff_cache/
+src/ecmc_ioc_generator/_version.py

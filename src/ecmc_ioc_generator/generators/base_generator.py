@@ -1,6 +1,5 @@
 """Base class for ECMC IOC generators."""
 
-from collections.abc import Callable
 import contextlib
 import re
 import sys
@@ -18,8 +17,6 @@ class BaseGenerator(ABC):
     INDEX_REGEX = re.compile(r"^(\d+)")
     # Regex to match motion-capable terminals (EL7xxx, ELM7xxx, AX5xxx)
     MOTION_REGEX = re.compile(r"\b(EL7\d{3}|ELM7\d{3}|AX5\d{3})")
-
-    # add_slave_fn: Callable[[str, str], str]
 
     def __init__(
         self,
@@ -53,12 +50,6 @@ class BaseGenerator(ABC):
     @abstractmethod
     def _add_slave_fn(self, hw_desc: str) -> str:
         """Return the addSlave iocshLoad command string for the given slave."""
-
-    # def _process_slaves(self, stream) -> None:
-    #     """Process the scanned lines to generate IOC configuration for each slave."""
-    #     hw_desc = "TEST"
-    #     add_slave_str = self._add_slave_fn(hw_desc)
-    #     print(f"# Example addSlave command: {add_slave_str}", file=stream)
 
     def _process_slaves(self, stream):
         """Match hardware and print addSlave commands."""

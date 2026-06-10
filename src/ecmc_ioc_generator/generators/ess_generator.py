@@ -39,7 +39,6 @@ class ESSGenerator(BaseGenerator):
             file=stream,
         )
 
-
     def _print_footer(self, stream):
         print("\n" + self.prefix + 'applyConfig.cmd"', file=stream)
         print(self.prefix + 'setAppMode.cmd"', file=stream)

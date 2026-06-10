@@ -1,35 +1,37 @@
-[build-system]
-build-backend = "setuptools.build_meta"
-requires = [
-  "setuptools>=42",
-  "wheel",
-]
-
 [project]
 name = "ecmc-ioc-generator"
-version = "1.0.0"
+# version = "1.0.0"
 description = "EtherCAT bus scanner and ecmc IOC generator."
 authors = [
   { name = "Markus Kristensson", email = "markus.kristensson@ess.eu" },
 ]
-requires-python = ">=2.7"
+dynamic = ["version"]
+requires-python = ">=3.12, <3.15"
 classifiers = [
-  "Programming Language :: Python :: 2",
-  "Programming Language :: Python :: 2.7",
-  "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.10",
-  "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
 ]
+
+[dependency-groups]
+dev = [
+  "ruff",
+  "pyright[nodejs] !=1.1.401, !=1.1.407",
+  "prek",
+  "pytest>=6",
+  "pytest-cov>=3",
+  "pytest-asyncio",
+  "pytest-md",
+  "typing-extensions",
+]
+
 dependencies = []
 
 [project.scripts]
 ecmc-ioc-gen = "ecmc_ioc_gen:main"
 
 [tool.ruff]
-target-version = "py37"
+target-version = "py312"
 line-length = 100
 include = ["*.py", "*.pyi", "**/pyproject.toml"]
 
@@ -57,3 +59,16 @@ lint.ignore = [
   "TD",     # TODOs
   "UP",     # ignore pyupgrade (protect 2.7 compatibility)
 ]
+
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[tool.hatch]
+version.source = "vcs"
+build.hooks.vcs.version-file = "src/ecmc-ioc-generator/_version.py"
+version.fallback-version = "0.0.0"
+
+[tool.hatch.envs.default]
+features = ["dev"]
+scripts.test = "pytest {args}"

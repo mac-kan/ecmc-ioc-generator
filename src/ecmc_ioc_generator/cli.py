@@ -3,8 +3,11 @@
 from __future__ import annotations
 
 import argparse
+import sys
 
+from .generators import ESSGenerator
 from .scanners import EthercatScanner
+
 
 def cli():
     """Parse command-line arguments and generate an ECMC IOC."""
@@ -22,11 +25,28 @@ def cli():
         action="store_true",
         help="Enable verbose output with comments describing each step.",
     )
+    parser.add_argument("--output", "-o", help="Output file path (default: stdout)")
+    parser.add_argument("--ecmc-ver", default="8.0.2", help="ECMC version to use (default: 8.0.2)")
+
     args = parser.parse_args()
 
     print(f"Generating ECMC IOC for facility: {args.facility}")
 
     ethercat_scanner = EthercatScanner()
-    l = ethercat_scanner.scan()
-    print(f"Scanned {len(l)} lines from EtherCAT bus or stdin.")
-    print(f"First 3 lines of scan output:\n{l[:3]}")
+    lines = ethercat_scanner.scan()
+    print(f"Scanned {len(lines)} lines from EtherCAT bus or stdin.")
+    print(f"First 3 lines of scan output:\n{lines[:3]}")
+
+    ioc_generator = ESSGenerator(
+        scanner=ethercat_scanner,
+        output_file=args.output,
+        ecmc_ver=args.ecmc_ver,
+        verbose=args.verbose,
+    )
+
+    try:
+        ioc_generator.generate()
+    except RuntimeError as e:
+        print(str(e), file=sys.stderr)
+        print("Usage: ecmc-ioc-gen OR cat slaves.txt | ecmc-ioc-gen", file=sys.stderr)
+        sys.exit(1)

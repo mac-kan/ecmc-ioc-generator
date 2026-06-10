@@ -1,4 +1,5 @@
 """Base scanner for ECMC IOC Generator."""
+
 from abc import ABC, abstractmethod
 
 
